@@ -59,7 +59,6 @@ int mul_fs_read_key(FILE *filePointer,char *dataToread,int sizeofdata,char *sKey
     {
         while(fgets(dataToread,sizeofdata,filePointer)!=NULL){
             if(strstr(dataToread,sKey)!=NULL){
-                printf("dataToread : %s\n",dataToread);
                 strncpy(line_holder,dataToread,strlen(dataToread));
                 flags++;
             }

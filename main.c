@@ -28,8 +28,8 @@ void file_write(char *key, char *value){
 
 }
 
-
-int file_read(char *key,char *valuetoWrite){
+ FILE *file_pointer = NULL;
+int file_read(char *key,char **valuetoWrite){
     int retVal = 0;
     int keyLen = strlen(key)+1;
     int vaLen;
@@ -38,9 +38,6 @@ int file_read(char *key,char *valuetoWrite){
     char *modified_key = NULL;
     char *line_holder = NULL;
     int modified_keyLen = strlen(key)+1;
-
-    FILE *file_pointer = NULL;
-    file_pointer = mul_fs_fopen(FILEPATH,"r+");
 
 
     readData = (char *)calloc(sizetoRead,sizeof(char));
@@ -56,8 +53,6 @@ int file_read(char *key,char *valuetoWrite){
     }
     sprintf(modified_key,"%s%s",key,"=");
 
-    printf("Modified key value : %s\n",modified_key);
-
 
     line_holder = (char *)calloc(128,sizeof(char));
     if(!line_holder){
@@ -66,12 +61,13 @@ int file_read(char *key,char *valuetoWrite){
     }
 
     if(file_pointer){
+        mul_fs_fseek(file_pointer,SEEK_SET,0);
         retVal = mul_fs_read_key(file_pointer,readData,sizetoRead,modified_key,line_holder);
         if(retVal!=1)
             return -1;
         vaLen = strlen(line_holder)-(keyLen+1);
-        memcpy(valuetoWrite,line_holder+keyLen,vaLen);
-        printf("valuekey : %s\n",valuetoWrite);
+        memcpy(*valuetoWrite,line_holder+keyLen,vaLen);
+        printf("valuekey : %s\n",*valuetoWrite);
         return 1;
 
     }
@@ -83,6 +79,8 @@ int main(){
 
     char *key = "Ankit";
     char *value = NULL;
+    char *key1 = "Ankit1";
+    char *value1 = NULL;
     /*CLeaning the file before writing*/
     file_clean();
 
@@ -95,14 +93,25 @@ int main(){
 
     /*Reading in file*/
     
-
+    file_pointer = mul_fs_fopen(FILEPATH,"r+");
     value = (char *)calloc(32,sizeof(char));
     if(!value){
         printf("memory allocation for value : Failed\n");
         return -2;
     }
-    if(file_read(key,value)==1){
+    if(file_read(key,&value)==1){
         printf("key : %s || value : %s\n",key,value);
     }
+
+    value1 = (char *)calloc(32,sizeof(char));
+    if(!value1){
+        printf("memory allocation for value1 : Failed\n");
+        return -2;
+    }
+    if(file_read(key1,&value1)==1){
+        printf("key : %s || value : %s\n",key,value1);
+    }
+
+    mul_fs_fclose(file_pointer);
     return 0;
 }
